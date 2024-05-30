@@ -29,7 +29,8 @@ def create_initial_data(db: Session):
 
 
 def read_data_by_id(db: Session, data_id: int):
-    return db.scalars(select(Data).where(Data.id == data_id).limit(1)).first()
+    result = db.scalars(select(Data).where(Data.id == data_id).limit(1)).first()
+    return result
 
 
 def read_data(
@@ -42,14 +43,12 @@ def read_data(
     if columns:
         valid_columns = [c.name for c in Data.__table__.columns]
         selected_columns = [getattr(Data, col) for col in columns if col in valid_columns]
-        # for column in selected_columns:
-        #     print(f'column = {type(column)}')
         if not selected_columns:
             raise ValueError("Invalid column names")
         
         # Response always contains timestamp
         if Data.timestamp not in selected_columns:
-            selected_columns.append(Data.timestamp)
+            selected_columns.insert(0, Data.timestamp)
         
         stmt = select(*selected_columns)
     else:
@@ -61,9 +60,12 @@ def read_data(
     if end_timestamp:
         stmt = stmt.where(Data.timestamp < end_timestamp)
 
-    # print(stmt)
-    result = db.execute(stmt).scalar().all()
-    # print(result)
+    # Execute the query, obtain list[Row]
+    query = db.execute(stmt).all()
+
+    # Transform to list[Dict]
+    result = [row._mapping for row in query]
+
     return result
 
 
