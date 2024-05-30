@@ -3,6 +3,8 @@ import argparse
 from datetime import datetime, timedelta
 import pandas as pd
 
+from alvodb import start, crud, database, models, schemas
+
 API_URL = "http://localhost:8000/data"
 ALVO_DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost:5433/Alvo"
 
@@ -65,7 +67,28 @@ def transform_data(data):
 
 
 def load_data(data):
-    pass
+    start.init_tables()
+
+    df = pd.DataFrame(data)
+    
+    db = next(database.get_db())
+
+    signal_ids = {signal.name: signal.id for signal in db.query(models.Signal).all()}
+    
+    for index, row in df.iterrows():
+        timestamp = row['timestamp']
+        for signal in ['power', 'wind_speed', 'ambient_temperature']:
+            for agg_method in ['mean', 'min', 'max', 'std']:
+                column_name = f"{signal}_{agg_method}"
+                if column_name in row:
+                    value = row[column_name]
+                    data_entry = schemas.DataCreate(
+                        timestamp=timestamp,
+                        signal_id=signal_ids[signal],
+                        value=value,
+                        aggregation_method=agg_method
+                    )
+                    crud.create_data(db, data_entry)
 
 
 def main(date: str, columns: list):
