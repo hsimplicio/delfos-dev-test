@@ -1,0 +1,42 @@
+name: delfos-dev-test
+
+services:
+  postgres-fonte:
+    image: postgres:latest
+    restart: always
+    container_name: postgres-fonte
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: Fonte
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-fonte-data:/var/lib/postgresql/data
+  
+  fonteapi:
+    build: ./fonteapi
+    container_name: fonte-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres-fonte
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://postgres:postgres@postgres-fonte:5432/Fonte"
+
+  # postgres-alvo:
+  #   image: postgres
+  #   restart: always
+  #   container_name: postgres-alvo
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: Alvo
+  #   ports:
+  #     - "5433:5432"
+  #   volumes:
+  #     - postgres-alvo-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-fonte-data:
+  # postgres-alvo-data:
