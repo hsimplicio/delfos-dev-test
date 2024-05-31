@@ -4,7 +4,6 @@ from datetime import datetime, timedelta, date
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-# from . import models, schemas
 from .models import Data
 
 
@@ -25,7 +24,7 @@ def create_initial_data(db: Session):
         print(".")
         db.add_all(data)
         db.commit()
-    print("Database populated")
+    print("Database populated.")
 
 
 def read_data_by_id(db: Session, data_id: int):
@@ -67,11 +66,3 @@ def read_data(
     result = [row._mapping for row in query]
 
     return result
-
-
-# def create_data(db: Session, data: schemas.DataCreate):
-#     db_data = Data(**data.model_dump())
-#     db.add(db_data)
-#     db.commit()
-#     db.refresh(db_data)
-#     return db_data

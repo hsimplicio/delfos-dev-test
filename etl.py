@@ -60,8 +60,6 @@ def transform_data(data):
     # Reset the index to make 'timestamp' a column again
     aggregated_data.reset_index(inplace=True)
 
-    # print(aggregated_data)
-
     return aggregated_data
 
 
