@@ -3,11 +3,17 @@ from dagster import (
     ScheduleDefinition,
     define_asset_job,
     load_assets_from_package_module,
+    DailyPartitionsDefinition,
 )
 
 from . import assets
 
-etl_job = define_asset_job(name="etl_job")
+daily_partitions_def = DailyPartitionsDefinition(start_date="2024-05-20", end_date="2024-05-30")
+
+etl_job = define_asset_job(
+    name="etl_job",
+    partitions_def=daily_partitions_def
+)
 
 daily_refresh_schedule = ScheduleDefinition(
     job=etl_job, cron_schedule="0 0 * * *"

@@ -1,22 +1,23 @@
-from dagster import asset
-
+from dagster import asset, AssetExecutionContext
 from datetime import datetime, timedelta
 import httpx
 import pandas as pd
 
 from alvodb import start, crud, database, models, schemas
+from dagster_etl.definitions import daily_partitions_def
 
 API_URL = "http://localhost:8000/data"
 
-@asset
-def fetch_data() -> list:
+@asset(partitions_def=daily_partitions_def)
+def fetch_data(context: AssetExecutionContext) -> list:
     """
     This asset daily fetch 1-minute interval data
     from the Fonte database API
     """
+    partition_date_str = context.partition_key
     try:
         # Convert date string to datetime object
-        start_date = datetime(2024, 5, 21)
+        start_date = datetime.strptime(partition_date_str, "%Y-%m-%d")
         end_date = start_date + timedelta(days=1)
 
         # Format dates for query parameters
@@ -46,7 +47,7 @@ def fetch_data() -> list:
         return None
 
 
-@asset()
+@asset(partitions_def=daily_partitions_def)
 def transform_data(fetch_data: list) -> pd.DataFrame:
     """
     This asset process the data to calculate
@@ -74,7 +75,7 @@ def transform_data(fetch_data: list) -> pd.DataFrame:
 
     return aggregated_data
 
-@asset
+@asset(partitions_def=daily_partitions_def)
 def load_data(transform_data: pd.DataFrame):
     """
     This asset loads the transformed data
