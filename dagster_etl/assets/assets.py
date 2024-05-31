@@ -1,50 +1,22 @@
 from dagster import asset, AssetExecutionContext
-from datetime import datetime, timedelta
-import httpx
 import pandas as pd
 
 from alvodb import start, crud, database, models, schemas
 from dagster_etl.definitions import daily_partitions_def
-
-API_URL = "http://localhost:8000/data"
+from dagster_etl.resources import FonteAPIResource, AlvoDBResource
 
 @asset(partitions_def=daily_partitions_def)
-def fetch_data(context: AssetExecutionContext) -> list:
+def fetch_data(
+    context: AssetExecutionContext,
+    fonte_conn: FonteAPIResource
+) -> list:
     """
     This asset daily fetch 1-minute interval data
     from the Fonte database API
     """
     partition_date_str = context.partition_key
-    try:
-        # Convert date string to datetime object
-        start_date = datetime.strptime(partition_date_str, "%Y-%m-%d")
-        end_date = start_date + timedelta(days=1)
-
-        # Format dates for query parameters
-        start_timestamp = start_date.isoformat()
-        end_timestamp = end_date.isoformat()
-
-        # Build the query parameters
-        params = {
-            "start_timestamp": start_timestamp,
-            "end_timestamp": end_timestamp,
-            "columns": ["wind_speed", "power"]
-        }
-
-        # Send GET request to the API
-        response = httpx.get(API_URL, params=params)
-
-        # Raise an exception if the request was unsuccessful
-        response.raise_for_status()
-
-        # Extract the JSON data from the response
-        data = response.json()
-
-        return data
-
-    except httpx.HTTPStatusError as e:
-        print(f"Error fetching data: {e}")
-        return None
+    data = fonte_conn.get(partition_date_str)
+    return data
 
 
 @asset(partitions_def=daily_partitions_def)
@@ -76,7 +48,10 @@ def transform_data(fetch_data: list) -> pd.DataFrame:
     return aggregated_data
 
 @asset(partitions_def=daily_partitions_def)
-def load_data(transform_data: pd.DataFrame):
+def load_data(
+    transform_data: pd.DataFrame,
+    alvo_conn: AlvoDBResource
+):
     """
     This asset loads the transformed data
     into two tables of Alvo database

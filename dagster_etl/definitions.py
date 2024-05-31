@@ -6,7 +6,7 @@ from dagster import (
     DailyPartitionsDefinition,
 )
 
-from . import assets
+from . import assets, resources
 
 daily_partitions_def = DailyPartitionsDefinition(start_date="2024-05-20", end_date="2024-05-30")
 
@@ -22,5 +22,9 @@ daily_refresh_schedule = ScheduleDefinition(
 defs = Definitions(
     assets=load_assets_from_package_module(assets),
     jobs=[etl_job],
-    schedules=[daily_refresh_schedule]
+    schedules=[daily_refresh_schedule],
+    resources={
+        "fonte_conn": resources.FonteAPIResource(),
+        "alvo_conn": resources.AlvoDBResource()
+    },
 )
