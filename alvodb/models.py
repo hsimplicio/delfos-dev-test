@@ -16,6 +16,5 @@ class Data(Base):
     timestamp = Column(DateTime, primary_key=True, index=True)
     signal_id = Column(Integer, ForeignKey('signal.id'), primary_key=True)
     value = Column(Float, nullable=False)
-    aggregation_method = Column(String, primary_key=True)
 
     signal = relationship("Signal")

@@ -12,7 +12,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-fonte-data:/var/lib/postgresql/data
+      # - postgres-fonte-data:/var/lib/postgresql/data
+      - /var/lib/postgresql/data
   
   fonteapi:
     build: ./fonteapi
@@ -35,8 +36,9 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres-alvo-data:/var/lib/postgresql/data
+      # - postgres-alvo-data:/var/lib/postgresql/data
+      - /var/lib/postgresql/data
 
-volumes:
-  postgres-fonte-data:
-  postgres-alvo-data:
+# volumes:
+#   postgres-fonte-data:
+#   postgres-alvo-data:

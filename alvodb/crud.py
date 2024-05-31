@@ -8,6 +8,10 @@ def read_signal(db: Session, signal_name: str):
     result = db.scalars(select(models.Signal).where(models.Signal.name == signal_name).limit(1)).first()
     return result
 
+def read_all_signals(db: Session):
+    result = db.scalars(select(models.Signal)).all()
+    return result
+
 
 def create_signal(db: Session, signal: schemas.SignalCreate):
     db_signal = models.Signal(name=signal.name)

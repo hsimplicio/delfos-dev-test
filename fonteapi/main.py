@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown tasks
-    models.Base.metadata.delete_all(bind=engine)
+    pass
 
 app = FastAPI(lifespan=lifespan)
 
