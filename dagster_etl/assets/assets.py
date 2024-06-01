@@ -56,13 +56,14 @@ def load_data(
     This asset loads the transformed data
     into two tables of Alvo database
     """
-    start.init_tables(transform_data.columns.values.tolist())
+    # start.init_tables(transform_data.columns.values.tolist())
+    alvo_conn.init_tables(transform_data.columns.values.tolist())
 
-    df = pd.DataFrame(transform_data)
+    df = transform_data
     
-    db = next(database.get_db())
-
-    signal_ids = {signal.name: signal.id for signal in crud.read_all_signals(db)}
+    # db = next(database.get_db())
+    # signal_ids = {signal.name: signal.id for signal in crud.read_all_signals(db)}
+    signal_ids = {signal.name: signal.id for signal in alvo_conn.read_all_signals()}
     
     for index, row in df.iterrows():
         timestamp = row['timestamp']
@@ -74,4 +75,7 @@ def load_data(
                     signal_id=signal_ids[signal_name],
                     value=value
                 )
-                crud.create_data(db, data_entry)
+                # crud.create_data(db, data_entry)
+                alvo_conn.create_data(data_entry)
+    
+    # db.close()
