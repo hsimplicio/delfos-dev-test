@@ -11,8 +11,8 @@ def fetch_data(
     fonte_conn: FonteAPIResource
 ) -> list:
     """
-    This asset daily fetch 1-minute interval data
-    from the Fonte database API
+    This asset fetch 1-minute interval data
+    for a specific day from the Fonte database using its API
     """
     partition_date_str = context.partition_key
     data = fonte_conn.get(partition_date_str)
